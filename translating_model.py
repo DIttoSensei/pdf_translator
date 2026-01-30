@@ -21,6 +21,7 @@ completion = client.chat.completions.create(
             1. Translate the text accurately to Nigerian Pidgin English.
             2. Don't add personal thought only write the translation.
             3. No personal opinion write off or questions just translated text.
+            4. Make sure translation is pure Nigerian Pidgin English.
             
             I need you to translate this text to Nigerian Pidgin English:
             {text}
