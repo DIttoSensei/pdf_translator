@@ -96,104 +96,98 @@
     </footer>
 
     <script>
-    const form = document.getElementById('uploadForm');
-    const card = document.getElementById('uploadCard');
-    const loading = document.getElementById('loadingArea');
-    const progressBar = document.getElementById('progressBar');
-    const statusText = document.getElementById('statusText');
-    const fileInput = document.getElementById('fileInput');
-    const fileNameDisplay = document.getElementById('fileName');
-    const dropZone = document.getElementById('dropZone');
-    const uploadIcon = document.getElementById('uploadIcon');
-    const uploadText = document.getElementById('uploadText');
-    const toast = document.getElementById('toast');
-    const toastMsg = document.getElementById('toastMsg');
+const form = document.getElementById('uploadForm');
+const card = document.getElementById('uploadCard');
+const loading = document.getElementById('loadingArea');
+const progressBar = document.getElementById('progressBar');
+const statusText = document.getElementById('statusText');
+const fileInput = document.getElementById('fileInput');
+const fileNameDisplay = document.getElementById('fileName');
+const dropZone = document.getElementById('dropZone');
+const uploadIcon = document.getElementById('uploadIcon');
+const uploadText = document.getElementById('uploadText');
+const toast = document.getElementById('toast');
+const toastMsg = document.getElementById('toastMsg');
 
-    function showToast(message) {
-        toastMsg.innerText = message;
-        toast.classList.remove('hidden');
-        toast.classList.add('animate-toast');
-        setTimeout(() => {
-            toast.classList.add('hidden');
-            toast.classList.remove('animate-toast');
-        }, 3000);
+function showToast(message) {
+    toastMsg.innerText = message;
+    toast.classList.remove('hidden');
+    toast.classList.add('animate-toast');
+    setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('animate-toast');
+    }, 4000);
+}
+
+fileInput.onchange = () => {
+    if (fileInput.files.length > 0) {
+        fileNameDisplay.innerText = "Selected: " + fileInput.files[0].name;
+        dropZone.classList.add('file-selected');
+        uploadIcon.classList.replace('fa-cloud-arrow-up', 'fa-file-circle-check');
+        uploadText.innerText = "File Locked In!";
+    }
+};
+
+form.onsubmit = async (e) => {
+    e.preventDefault();
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        showToast("Abeg upload one PDF first!");
+        return;
     }
 
-    fileInput.onchange = () => {
-        if (fileInput.files.length > 0) {
-            fileNameDisplay.innerText = "Selected: " + fileInput.files[0].name;
-            dropZone.classList.add('file-selected');
-            uploadIcon.classList.replace('fa-cloud-arrow-up', 'fa-file-circle-check');
-            uploadText.innerText = "File Locked In!";
+    const selectedFile = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    card.classList.add('hidden');
+    loading.classList.remove('hidden');
+    statusText.innerText = "AI de summarize and translate...";
+
+    try {
+        const response = await fetch('/process', { method: 'POST', body: formData });
+        
+        if (!response.ok) {
+            let errorDetail = 'Unknown server error';
+            try {
+                const data = await response.json();
+                errorDetail = data.detail || errorDetail;
+            } catch {}
+            throw new Error(errorDetail);
         }
-    };
 
-    form.onsubmit = async (e) => {
-        e.preventDefault();
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "PIDGIN_" + selectedFile.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
 
-        if (!fileInput.files || fileInput.files.length === 0) {
-            showToast("Abeg upload one PDF first!");
-            return;
-        }
+        statusText.innerText = "Done! Check your downloads.";
 
-        const selectedFile = fileInput.files[0];
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-
-        card.classList.add('hidden');
-        loading.classList.remove('hidden');
-        statusText.innerText = "AI de summarize and translate...";
-
-        try {
-            const response = await fetch('/api/process', { method: 'POST', body: formData });
-            if (!response.ok) throw new Error('Server side error');
-
-            const reader = response.body.getReader();
-            const contentLength = +response.headers.get('Content-Length') || 1000000;
-            let receivedLength = 0;
-            let chunks = [];
-
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                receivedLength += value.length;
-                let percent = Math.round((receivedLength / contentLength) * 100);
-                progressBar.style.width = Math.min(percent, 100) + '%';
-                progressBar.innerText = Math.min(percent, 100) + '%';
-            }
-
-            const blob = new Blob(chunks);
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "PIDGIN_" + selectedFile.name;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-
-            statusText.innerText = "Done! Check your downloads.";
-
-            setTimeout(() => {
-                loading.classList.add('hidden');
-                card.classList.remove('hidden');
-                form.reset(); 
-                fileNameDisplay.innerText = "";
-                dropZone.classList.remove('file-selected');
-                uploadIcon.classList.replace('fa-file-circle-check', 'fa-cloud-arrow-up');
-                uploadText.innerText = "Drop PDF here or click";
-                progressBar.style.width = '0%';
-            }, 3000);
-
-        } catch (err) {
-            showToast("Something go wrong!");
+        setTimeout(() => {
             loading.classList.add('hidden');
             card.classList.remove('hidden');
             form.reset();
             fileNameDisplay.innerText = "";
             dropZone.classList.remove('file-selected');
-        }
-    };
-    </script>
+            uploadIcon.classList.replace('fa-file-circle-check', 'fa-cloud-arrow-up');
+            uploadText.innerText = "Drop PDF here or click";
+            progressBar.style.width = '0%';
+        }, 2000);
+
+    } catch (err) {
+        showToast("Server error: " + err.message);
+        loading.classList.add('hidden');
+        card.classList.remove('hidden');
+        form.reset();
+        fileNameDisplay.innerText = "";
+        dropZone.classList.remove('file-selected');
+    }
+};
+</script>
+
 </body>
 </html>
