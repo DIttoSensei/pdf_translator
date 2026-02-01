@@ -5,10 +5,11 @@ from fastapi.staticfiles import StaticFiles
 import os
 import shutil
 
-from modules.pdf_extract import extract_pdf
-from modules.summarization_model import run_summarization
-from modules.translating_model import run_translation
-from modules.write_to_pdf import create_formatted_pdf
+from .modules.pdf_extract import extract_pdf
+from .modules.summarization_model import run_summarization
+from .modules.translating_model import run_translation
+from .modules.write_to_pdf import create_formatted_pdf
+
 
 app = FastAPI()
 
