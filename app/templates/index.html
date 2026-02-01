@@ -20,8 +20,6 @@
         .animate-fade-up { animation: fadeUp 0.6s ease-out forwards; }
         .animate-toast { animation: fadeInOut 3s ease-in-out forwards; }
         .file-selected { border-color: #228B22 !important; background-color: #f0fdf4 !important; }
-        
-        /* Ensure no scroll on desktop, allow on tiny phones */
         body { overflow-x: hidden; }
     </style>
 </head>
@@ -144,9 +142,21 @@ form.onsubmit = async (e) => {
     loading.classList.remove('hidden');
     statusText.innerText = "AI de summarize and translate...";
 
+    // --- FAKE PROGRESS BAR START ---
+    let percent = 0;
+    progressBar.style.width = '0%';
+    progressBar.innerText = '0%';
+    const progressInterval = setInterval(() => {
+        percent += Math.random() * 5;
+        if (percent >= 90) percent = 90;
+        progressBar.style.width = percent + '%';
+        progressBar.innerText = Math.round(percent) + '%';
+    }, 200);
+    // --- FAKE PROGRESS BAR END ---
+
     try {
         const response = await fetch('/process', { method: 'POST', body: formData });
-        
+
         if (!response.ok) {
             let errorDetail = 'Unknown server error';
             try {
@@ -165,6 +175,12 @@ form.onsubmit = async (e) => {
         a.click();
         a.remove();
 
+        // --- COMPLETE FAKE PROGRESS BAR ---
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        progressBar.innerText = '100%';
+        // --- DONE ---
+
         statusText.innerText = "Done! Check your downloads.";
 
         setTimeout(() => {
@@ -179,12 +195,14 @@ form.onsubmit = async (e) => {
         }, 2000);
 
     } catch (err) {
+        clearInterval(progressInterval);
         showToast("Server error: " + err.message);
         loading.classList.add('hidden');
         card.classList.remove('hidden');
         form.reset();
         fileNameDisplay.innerText = "";
         dropZone.classList.remove('file-selected');
+        progressBar.style.width = '0%';
     }
 };
 </script>
