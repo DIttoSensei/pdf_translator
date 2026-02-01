@@ -29,6 +29,27 @@ if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+@app.get("/favicon.ico")
+async def get_favicon():
+    return FileResponse(os.path.join(BASE_DIR, "favicon.ico"))
+
+@app.get("/apple-touch-icon.png")
+async def get_apple_touch_icon():
+    return FileResponse(os.path.join(BASE_DIR, "apple-touch-icon.png"))
+
+@app.get("/favicon-16x16.png")
+async def get_favicon_16():
+    return FileResponse(os.path.join(BASE_DIR, "favicon-16x16.png"))
+
+@app.get("/favicon-32x32.png")
+async def get_favicon_32():
+    return FileResponse(os.path.join(BASE_DIR, "favicon-32x32.png"))
+
+@app.get("/site.webmanifest")
+async def get_manifest():
+    return FileResponse(os.path.join(BASE_DIR, "site.webmanifest"))
+
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
