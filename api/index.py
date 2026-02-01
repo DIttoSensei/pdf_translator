@@ -16,9 +16,10 @@ app = FastAPI()
 
 @app.post("/api/process")
 async def handle_pdf_logic(file: UploadFile = File(...)):
-    temp_dir = tempfile.gettempdir() 
+    temp_dir = "/tmp"
     input_path = os.path.join(temp_dir, file.filename)
-    output_path = os.path.join(temp_dir, f"TRANSLATED_{file.filename}")
+    output_path = os.path.join(temp_dir, f"PIDGIN_{file.filename}")
+
 
     try:
         with open(input_path, "wb") as buffer:
