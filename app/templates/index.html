@@ -150,7 +150,7 @@ form.onsubmit = async (e) => {
         percent += Math.random() * 5;
         if (percent >= 90) percent = 90;
         progressBar.style.width = percent + '%';
-        progressBar.innerText = Math.round(percent) + '%';
+        //progressBar.innerText = Math.round(percent) + '%';
     }, 200);
     // --- FAKE PROGRESS BAR END ---
 
@@ -178,7 +178,7 @@ form.onsubmit = async (e) => {
         // --- COMPLETE FAKE PROGRESS BAR ---
         clearInterval(progressInterval);
         progressBar.style.width = '100%';
-        progressBar.innerText = '100%';
+        //progressBar.innerText = '100%';
         // --- DONE ---
 
         statusText.innerText = "Done! Check your downloads.";
